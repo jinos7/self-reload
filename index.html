@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOXL 셀프 리로드 앰플리파이어 &amp; 절세 실행기</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      background-color: #020617;
+      color: #f8fafc;
+    }
+    input[type="range"] {
+      accent-color: #3b82f6;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-blue-500/30 selection:text-blue-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+    <!-- Header & Finnhub Live Quote Panel -->
+    <header class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+        <!-- Left Title & Cloud Status -->
+        <div class="space-y-1.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+              <span>⚡ SELF-RELOAD AMPLIFIER</span>
+              <span>·</span>
+              <span>하락장 수량 증폭 시뮬레이터</span>
+            </span>
+            <span id="cloud-sync-badge" class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs">
+              ☁️ 클라우드 연결 대기 중...
+            </span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+            SOXL 셀프 리로드 앰플리파이어 &amp; 절세 실행기
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-400">
+            코어 물량(80%)은 보존하고 회전 물량(20%)의 반등 분할 매도·재하락 매수로 추가 현금 없이도 주식 수량을 늘립니다.
+          </p>
+        </div>
+
+        <!-- Right Finnhub API & Quote Strip -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 sm:p-4 lg:w-[460px] space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-xs font-medium text-slate-300">
+              <span id="api-status-dot" class="h-2 w-2 rounded-full bg-slate-500"></span>
+              <span id="api-status-text">Finnhub 시세 대기</span>
+            </div>
+            <button type="button" onclick="fetchRealtimeQuote(true)" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold transition">
+              <svg id="refresh-icon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>현재가 새로고침</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-12 gap-2">
+            <div class="col-span-4">
+              <label for="inp-symbol" class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">티커 (Symbol)</label>
+              <input id="inp-symbol" type="text" value="SOXL" class="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-lg px-2.5 py-1.5 text-xs font-bold uppercase text-white" />
+            </div>
+            <div class="col-span-8">
+              <label for="inp-api-key" class="block text-[10px] uppercase tracking-wider text-slate-500 mb-1">Finnhub API Key</label>
+              <div class="relative flex items-center">
+                <input id="inp-api-key" type="password" value="d40b8f9r01qkrgfcbnf0d40b8f9r01qkrgfcbnfg" class="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-lg pl-2.5 pr-12 py-1.5 text-xs text-slate-300 font-mono" />
+                <button type="button" onclick="toggleApiKeyVisibility()" class="absolute right-2 text-[10px] text-slate-400 hover:text-white px-1.5 py-0.5 rounded bg-slate-800">표시</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quote Strip -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs">
+            <div>
+              <span class="text-slate-400">실시간가:</span>
+              <strong id="quote-c" class="text-white font-bold ml-1">$25.00</strong>
+              <span id="quote-dp" class="ml-1.5 px-1.5 py-0.5 rounded font-semibold bg-slate-800 text-slate-300">0.00%</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] text-slate-400">
+              <span>고 <strong id="quote-h" class="text-slate-300">-</strong></span>
+              <span>저 <strong id="quote-l" class="text-slate-300">-</strong></span>
+              <span id="quote-updated-at" class="text-slate-500">대기 중</span>
+            </div>
+          </div>
+
+          <!-- Cloud Sync User ID Strip -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+            <span class="truncate">동기화 계정: <strong id="cloud-user-id" class="font-mono text-slate-300">미연결</strong></span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="openFirebaseModal()" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+                ⚙️ Firebase 설정
+              </button>
+              <button id="btn-google-login" type="button" onclick="handleGoogleAuthClick()" class="hidden px-2 py-0.5 rounded bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 font-semibold transition">
+                Google 로그인
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top Account Summary KPI Cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+          <span>🛡️ 코어 보존 물량 (Core)</span>
+          <span id="stat-core-pct" class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-semibold">비중 80%</span>
+        </div>
+        <div id="stat-core-shares" class="text-2xl font-extrabold text-white mt-1">1,095주</div>
+        <p class="text-xs text-slate-500 mt-1">대상승장까지 매도 금지 물량</p>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+          <span>🔄 회전 증폭 물량 (Reload)</span>
+          <span id="stat-reload-pct" class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-semibold">비중 20%</span>
+        </div>
+        <div id="stat-reload-shares" class="text-2xl font-extrabold text-amber-300 mt-1">274주</div>
+        <p class="text-xs text-slate-500 mt-1">반등 매도·재하락 매수 순환용</p>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+        <div class="text-xs text-slate-400 mb-1">💰 총 매입 원금</div>
+        <div id="stat-total-principal" class="text-2xl font-extrabold text-white mt-1">$190,415.85</div>
+        <p id="stat-total-principal-krw" class="text-xs text-slate-400 mt-1">266,582,190원</p>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5">
+        <div class="text-xs text-slate-400 mb-1">📉 현재 평가금액 및 평가손익</div>
+        <div id="stat-current-eval" class="text-2xl font-extrabold text-white mt-1">$34,225.00</div>
+        <p id="stat-unrealized-pnl" class="text-xs font-semibold text-rose-400 mt-1">-$156,190.85 (-82.03%)</p>
+      </div>
+    </section>
+
+    <!-- Main Workspace: Left Parameters & Right Tranche Plan -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Panel: Strategy & Account Parameters -->
+      <aside class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5 h-fit">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>⚙️ 계좌 및 회전 전략 설정</span>
+          </h2>
+          <button type="button" onclick="resetDefaultSettings()" class="text-xs text-slate-400 hover:text-white underline">초기화</button>
+        </div>
+
+        <!-- Preset Buttons -->
+        <div class="space-y-1.5">
+          <span class="block text-xs font-medium text-slate-400">빠른 변동성 프리셋</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="applyPresetStrategy(3.5, 4.5)" class="py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">
+              보수적<br><span class="text-[10px] text-slate-400">+3.5% / -4.5%</span>
+            </button>
+            <button type="button" onclick="applyPresetStrategy(5.0, 6.0)" class="py-2 px-2 rounded-xl bg-blue-600/20 border border-blue-500/40 hover:bg-blue-600/30 text-xs font-semibold text-blue-300 transition">
+              표준형<br><span class="text-[10px] text-blue-400">+5.0% / -6.0%</span>
+            </button>
+            <button type="button" onclick="applyPresetStrategy(8.0, 10.0)" class="py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">
+              급등락<br><span class="text-[10px] text-slate-400">+8.0% / -10.0%</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Holdings Inputs -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="inp-shares" class="block text-xs font-medium text-slate-400 mb-1">보유 수량 (주)</label>
+            <input id="inp-shares" type="number" step="1" min="1" value="1369" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white" />
+          </div>
+          <div>
+            <label for="inp-avg-price" class="block text-xs font-medium text-slate-400 mb-1">내 평단가 ($)</label>
+            <input id="inp-avg-price" type="number" step="0.0001" min="0.01" value="139.0912" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="inp-curr-price" class="block text-xs font-medium text-slate-400 mb-1">기준 현재가 ($)</label>
+            <input id="inp-curr-price" type="number" step="0.01" min="0.01" value="25.00" class="w-full bg-slate-950 border border-blue-500/50 focus:border-blue-500 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-blue-300" />
+          </div>
+          <div>
+            <label for="inp-fx" class="block text-xs font-medium text-slate-400 mb-1">적용 환율 (원/$)</label>
+            <input id="inp-fx" type="number" step="1" min="1" value="1400" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl px-3 py-2 text-sm font-semibold text-slate-200" />
+          </div>
+        </div>
+
+        <!-- Core / Reload Ratio Slider -->
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <label for="inp-core-ratio" class="text-xs font-medium text-slate-300">코어 보존 비중 (%)</label>
+            <div class="flex items-center gap-1">
+              <input id="inp-core-ratio-num" type="number" min="50" max="95" value="80" class="w-14 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-right text-xs font-bold text-blue-400" />
+              <span class="text-xs text-slate-400">%</span>
+            </div>
+          </div>
+          <input id="inp-core-ratio" type="range" min="50" max="95" step="1" value="80" class="w-full cursor-pointer" />
+          <div class="flex justify-between text-[11px] text-slate-500">
+            <span>50% (공격적 회전)</span>
+            <span>80% (권장)</span>
+            <span>95% (보수적)</span>
+          </div>
+        </div>
+
+        <!-- Tranche & Percentage Rules -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label for="inp-tranches" class="block text-[11px] font-medium text-slate-400 mb-1">분할 차수</label>
+            <input id="inp-tranches" type="number" min="2" max="10" step="1" value="4" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl px-2.5 py-2 text-sm font-bold text-white" />
+          </div>
+          <div>
+            <label for="inp-sell-step" class="block text-[11px] font-medium text-amber-400 mb-1">반등 매도 (+%)</label>
+            <input id="inp-sell-step" type="number" min="0.1" max="50" step="0.5" value="5.0" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-2.5 py-2 text-sm font-bold text-amber-300" />
+          </div>
+          <div>
+            <label for="inp-rebuy-step" class="block text-[11px] font-medium text-emerald-400 mb-1">재매수 하락 (-%)</label>
+            <input id="inp-rebuy-step" type="number" min="0.1" max="50" step="0.5" value="6.0" class="w-full bg-slate-950 border border-slate-700 focus:border-emerald-500 focus:outline-none rounded-xl px-2.5 py-2 text-sm font-bold text-emerald-300" />
+          </div>
+        </div>
+
+        <!-- Extra Cash Input -->
+        <div class="bg-blue-950/20 border border-blue-500/20 rounded-xl p-3.5 space-y-1.5">
+          <label for="inp-extra-cash" class="block text-xs font-semibold text-blue-300">
+            💵 추가 투입 가능 달러 현금 ($)
+          </label>
+          <input id="inp-extra-cash" type="number" min="0" step="10" value="0" placeholder="0" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl px-3 py-2 text-sm font-bold text-white" />
+          <p class="text-[11px] text-slate-400">
+            추가금이 있으면 각 분할 차수에 균등 배분되어 재매수 시 확보 수량이 더욱 크게 증가합니다.
+          </p>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Step-by-step Execution Table -->
+      <section class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white">📊 차수별 시첩시첩(반등 매도 → 재하락 매수) 실행 계획표</h2>
+              <p class="text-xs text-slate-400 mt-0.5">목표 매도가 도달 시 매도하여 달러 총알과 양도세 절세용 실현손실을 확보한 뒤, 재매수가 도달 시 주수를 늘립니다.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-800">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr class="bg-slate-950/90 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
+                  <th class="py-3 px-4">차수</th>
+                  <th class="py-3 px-4 text-right">목표 매도가</th>
+                  <th class="py-3 px-4 text-right">매도 수량</th>
+                  <th class="py-3 px-4 text-right">확보 달러</th>
+                  <th class="py-3 px-4 text-right">절세용 확정손익</th>
+                  <th class="py-3 px-4 text-right">재매수 목표가</th>
+                  <th class="py-3 px-4 text-right">재매수 수량</th>
+                  <th class="py-3 px-4 text-right">순증가 주수</th>
+                  <th class="py-3 px-4 text-center">원클릭 기록</th>
+                </tr>
+              </thead>
+              <tbody id="plan-tbody" class="divide-y divide-slate-800/70 text-xs sm:text-sm">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Plan Summary Footer -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-950/80 border border-slate-800 rounded-xl p-4">
+          <div>
+            <span class="block text-[11px] text-slate-400">총 확보 회전 달러</span>
+            <strong id="plan-total-cash" class="text-sm sm:text-base font-bold text-amber-300">$0.00</strong>
+          </div>
+          <div>
+            <span class="block text-[11px] text-slate-400">예상 양도세 상계 손익</span>
+            <strong id="plan-total-tax-loss" class="text-sm sm:text-base font-bold text-purple-300">$0.00</strong>
+          </div>
+          <div>
+            <span class="block text-[11px] text-slate-400">1사이클 완주 시 주수 변화</span>
+            <strong id="plan-net-gain-shares" class="text-sm sm:text-base font-bold text-emerald-400">+0주</strong>
+          </div>
+          <div>
+            <span class="block text-[11px] text-slate-400">체감 실질 평단가 효과</span>
+            <strong id="plan-effective-avg" class="text-sm sm:text-base font-bold text-blue-300">$139.09</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom Section: Cloud Synced Trade Execution Journal -->
+    <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>📒 실전 매매 체결 장부 &amp; 양도세 절세 트래커</span>
+            <span id="journal-summary-stats" class="text-xs font-normal text-slate-400 ml-1">기록 0건</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">기록된 매매 내역은 클라우드에 자동 저장되어 PC와 모바일에서 실시간으로 동기화됩니다.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="exportJournalCSV()" class="px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition">
+            📥 구글 시트용 CSV 내보내기
+          </button>
+          <button type="button" onclick="clearJournal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-300 text-slate-400 text-xs font-semibold transition">
+            전체 삭제
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual Trade Entry Form -->
+      <form id="trade-form" class="grid grid-cols-2 sm:grid-cols-12 gap-2.5 bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl">
+        <div class="col-span-1 sm:col-span-2">
+          <label for="t-date" class="block text-[10px] text-slate-400 mb-1">체결일자</label>
+          <input id="t-date" type="date" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+        </div>
+        <div class="col-span-1 sm:col-span-2">
+          <label for="t-type" class="block text-[10px] text-slate-400 mb-1">매매구분</label>
+          <select id="t-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white">
+            <option value="SELL">분할 매도 (총알확보)</option>
+            <option value="BUY">수량 재매수 (증폭)</option>
+          </select>
+        </div>
+        <div class="col-span-1 sm:col-span-2">
+          <label for="t-price" class="block text-[10px] text-slate-400 mb-1">체결단가 ($)</label>
+          <input id="t-price" type="number" step="0.01" min="0.01" placeholder="26.25" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+        </div>
+        <div class="col-span-1 sm:col-span-2">
+          <label for="t-shares" class="block text-[10px] text-slate-400 mb-1">체결수량 (주)</label>
+          <input id="t-shares" type="number" step="1" min="1" placeholder="69" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+        </div>
+        <div class="col-span-2 sm:col-span-2">
+          <label for="t-memo" class="block text-[10px] text-slate-400 mb-1">메모 (선택)</label>
+          <input id="t-memo" type="text" placeholder="1차 반등 매도" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+        </div>
+        <div class="col-span-2 sm:col-span-2 flex items-end">
+          <button type="submit" class="w-full py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition">
+            + 내역 추가
+          </button>
+        </div>
+      </form>
+
+      <!-- Journal Table -->
+      <div class="overflow-x-auto rounded-xl border border-slate-800">
+        <table class="w-full text-left border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="bg-slate-950/90 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
+              <th class="py-3 px-4">일자</th>
+              <th class="py-3 px-4">구분</th>
+              <th class="py-3 px-4 text-right">체결단가</th>
+              <th class="py-3 px-4 text-right">수량</th>
+              <th class="py-3 px-4 text-right">총 체결금액</th>
+              <th class="py-3 px-4 text-right">양도세 상계 손익</th>
+              <th class="py-3 px-4">메모</th>
+              <th class="py-3 px-4 text-center">관리</th>
+            </tr>
+          </thead>
+          <tbody id="journal-tbody" class="divide-y divide-slate-800/70 text-xs sm:text-sm">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        <div id="journal-empty" class="py-10 text-center text-xs text-slate-500">
+          아직 기록된 매매 내역이 없습니다. 위 실행 계획표의 <strong>[매도기록] / [매수기록]</strong> 버튼을 누르거나 직접 체결 내역을 추가해보세요.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-medium">
+      <span id="toast-icon">✅</span>
+      <span id="toast-msg">알림 메시지</span>
+    </div>
+  </div>
+
+  <!-- Firebase Config Setup Modal -->
+  <div id="firebase-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-white">🔥 Firebase 프로젝트 (`self-reload`) 연동 설정</h3>
+        <button type="button" onclick="closeFirebaseModal()" class="text-slate-400 hover:text-white text-sm px-2 py-1">✕</button>
+      </div>
+      <div class="space-y-2 text-xs text-slate-300">
+        <p>Firebase 콘솔의 <strong>프로젝트 설정 → 내 앱(웹)</strong>에서 발급받은 <code class="text-blue-400">firebaseConfig</code> 객체 또는 JSON 전체를 아래에 붙여넣으세요.</p>
+        <textarea id="inp-firebase-config" rows="8" placeholder='const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "self-reload.firebaseapp.com",
+  projectId: "self-reload",
+  storageBucket: "self-reload.firebasestorage.app",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+};' class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl p-3 font-mono text-xs text-slate-200"></textarea>
+        <p class="text-[11px] text-slate-400">
+          ※ 입력한 설정은 현재 브라우저에 저장되며, 저장 후 <strong>Google 로그인</strong>을 하면 PC와 모바일에서 동일한 매매 장부가 실시간 동기화됩니다.
+        </p>
+      </div>
+      <div class="flex items-center justify-between pt-2">
+        <button type="button" onclick="clearCustomFirebaseConfig()" class="text-xs text-rose-400 hover:text-rose-300 underline">설정 초기화</button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeFirebaseModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">취소</button>
+          <button type="button" onclick="saveCustomFirebaseConfig()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white">저장 및 연결</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps, deleteApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Default Configuration
+    const DEFAULT_FINNHUB_KEY = 'd40b8f9r01qkrgfcbnf0d40b8f9r01qkrgfcbnfg';
+    const STORAGE_KEY_FB_CONFIG = 'soxl_custom_firebase_config_v1';
+    const DEFAULT_STATE = {
+      symbol: 'SOXL',
+      apiKey: DEFAULT_FINNHUB_KEY,
+      shares: 1369,
+      avgPrice: 139.0912,
+      currPrice: 25.00,
+      coreRatio: 80,
+      tranches: 4,
+      sellStep: 5.0,
+      rebuyStep: 6.0,
+      extraCash: 0,
+      fxRate: 1400
+    };
+
+    let state = { ...DEFAULT_STATE };
+    let journal = [];
+    let currentPlanRows = [];
+
+    // Firebase / Cloud Sync Variables
+    const envAppId = typeof __app_id !== 'undefined' ? __app_id : null;
+    let isCustomFirebase = false;
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let unsubscribeSettings = null;
+    let unsubscribeJournal = null;
+    let settingsSaveTimer = null;
+
+    // Safe DOM helper
+    function setVal(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    }
+
+    function setText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function updateCloudBadge(status, label, detail = '') {
+      const badge = document.getElementById('cloud-sync-badge');
+      if (badge) {
+        badge.textContent = label;
+        if (status === 'connected') {
+          badge.className = 'px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-semibold';
+        } else if (status === 'error') {
+          badge.className = 'px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30 text-xs font-semibold';
+        } else {
+          badge.className = 'px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs';
+        }
+      }
+      if (detail) setText('cloud-sync-detail', detail);
+    }
+
+    // Formatters
+    function fmtUSD(val) {
+      if (isNaN(val)) return '$0.00';
+      const sign = val < 0 ? '-' : '';
+      return `${sign}$${Math.abs(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function fmtKRW(usdVal, fxRate) {
+      if (isNaN(usdVal)) return '0원';
+      const krw = Math.round(usdVal * fxRate);
+      const sign = krw < 0 ? '-' : '';
+      return `${sign}${Math.abs(krw).toLocaleString('ko-KR')}원`;
+    }
+
+    function fmtNum(val, decimals = 0) {
+      if (isNaN(val)) return '0';
+      return Number(val).toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function syncInputsFromState() {
+      setVal('inp-symbol', state.symbol);
+      setVal('inp-api-key', state.apiKey);
+      setVal('inp-shares', state.shares);
+      setVal('inp-avg-price', state.avgPrice);
+      setVal('inp-curr-price', state.currPrice);
+      setVal('inp-core-ratio', state.coreRatio);
+      setVal('inp-core-ratio-num', state.coreRatio);
+      setVal('inp-tranches', state.tranches);
+      setVal('inp-sell-step', state.sellStep);
+      setVal('inp-rebuy-step', state.rebuyStep);
+      setVal('inp-extra-cash', state.extraCash);
+      setVal('inp-fx', state.fxRate);
+    }
+
+    function parseFirebaseConfigInput(rawText) {
+      const cleaned = rawText
+        .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+        .replace(/const\s+\w+\s*=\s*/, '')
+        .replace(/;\s*$/, '')
+        .trim();
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace === -1 || lastBrace === -1) {
+        throw new Error('올바른 중괄호({ ... }) 형식의 설정 객체가 아닙니다.');
+      }
+      const objStr = cleaned.slice(firstBrace, lastBrace + 1);
+      // Convert JS object literal keys to valid JSON keys safely
+      const jsonStr = objStr
+        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
+        .replace(/,\s*}/g, '}');
+      const parsed = JSON.parse(jsonStr);
+      if (!parsed.apiKey || !parsed.projectId) {
+        throw new Error('apiKey와 projectId 항목이 반드시 포함되어야 합니다.');
+      }
+      return parsed;
+    }
+
+    function openFirebaseModal() {
+      const saved = localStorage.getItem(STORAGE_KEY_FB_CONFIG);
+      if (saved) {
+        setVal('inp-firebase-config', saved);
+      }
+      const modal = document.getElementById('firebase-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeFirebaseModal() {
+      const modal = document.getElementById('firebase-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function saveCustomFirebaseConfig() {
+      const raw = document.getElementById('inp-firebase-config').value;
+      try {
+        const parsed = parseFirebaseConfigInput(raw);
+        localStorage.setItem(STORAGE_KEY_FB_CONFIG, JSON.stringify(parsed, null, 2));
+        closeFirebaseModal();
+        showToast(`Firebase (${parsed.projectId}) 설정이 저장되었습니다. 연결 중...`, '🔥');
+        await initCloudSync();
+      } catch (err) {
+        showToast(`설정 형식 오류: ${err.message}`, '⚠️');
+      }
+    }
+
+    async function clearCustomFirebaseConfig() {
+      localStorage.removeItem(STORAGE_KEY_FB_CONFIG);
+      setVal('inp-firebase-config', '');
+      closeFirebaseModal();
+      showToast('사용자 Firebase 설정이 초기화되었습니다.', '🧹');
+      await initCloudSync();
+    }
+
+    async function handleGoogleAuthClick() {
+      if (!auth) {
+        openFirebaseModal();
+        return;
+      }
+      try {
+        if (currentUser && !currentUser.isAnonymous) {
+          await signOut(auth);
+          showToast('로그아웃되었습니다.', '👋');
+        } else {
+          const provider = new GoogleAuthProvider();
+          await signInWithPopup(auth, provider);
+          showToast('Google 계정으로 로그인되었습니다! 실시간 동기화가 시작됩니다.', '☁️');
+        }
+      } catch (err) {
+        console.error('Google Auth error:', err);
+        showToast(`로그인 오류: ${err.message} (승인된 도메인 설정을 확인하세요)`, '⚠️');
+      }
+    }
+
+    function getUserSettingsDocRef(userId) {
+      if (isCustomFirebase) {
+        return doc(db, 'users', userId, 'soxl_reload_settings', 'main');
+      }
+      return doc(db, 'artifacts', envAppId || 'default-app-id', 'users', userId, 'soxl_reload_settings', 'main');
+    }
+
+    function getUserJournalColRef(userId) {
+      if (isCustomFirebase) {
+        return collection(db, 'users', userId, 'soxl_reload_journal');
+      }
+      return collection(db, 'artifacts', envAppId || 'default-app-id', 'users', userId, 'soxl_reload_journal');
+    }
+
+    function getUserJournalDocRef(userId, docId) {
+      if (isCustomFirebase) {
+        return doc(db, 'users', userId, 'soxl_reload_journal', docId);
+      }
+      return doc(db, 'artifacts', envAppId || 'default-app-id', 'users', userId, 'soxl_reload_journal', docId);
+    }
+
+    // Cloud Initialization
+    async function initCloudSync() {
+      try {
+        if (unsubscribeSettings) { unsubscribeSettings(); unsubscribeSettings = null; }
+        if (unsubscribeJournal) { unsubscribeJournal(); unsubscribeJournal = null; }
+
+        const existingApps = getApps();
+        for (const a of existingApps) {
+          await deleteApp(a);
+        }
+
+        let firebaseConfig = null;
+        const customRaw = localStorage.getItem(STORAGE_KEY_FB_CONFIG);
+        if (customRaw) {
+          firebaseConfig = JSON.parse(customRaw);
+          isCustomFirebase = true;
+        } else if (typeof __firebase_config !== 'undefined') {
+          firebaseConfig = JSON.parse(__firebase_config);
+          isCustomFirebase = false;
+        }
+
+        const loginBtn = document.getElementById('btn-google-login');
+
+        if (!firebaseConfig) {
+          updateCloudBadge('error', '⚠️ Firebase 미연결 (우측 ⚙️ 설정 클릭)', '설정 필요');
+          setText('cloud-user-id', '미연결');
+          if (loginBtn) loginBtn.classList.add('hidden');
+          return;
+        }
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+
+        if (!isCustomFirebase) {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          currentUser = user;
+          if (!user) {
+            updateCloudBadge('error', '🔑 Google 로그인 필요', '로그인 대기');
+            setText('cloud-user-id', '로그인 전');
+            if (loginBtn && isCustomFirebase) {
+              loginBtn.textContent = 'Google 로그인';
+              loginBtn.classList.remove('hidden');
+            }
+            return;
+          }
+
+          const displayLabel = user.email || user.displayName || user.uid;
+          setText('cloud-user-id', displayLabel);
+          updateCloudBadge('connected', `☁️ ${firebaseConfig.projectId || '클라우드'} 실시간 동기화됨`, '자동 저장 활성');
+
+          if (loginBtn && isCustomFirebase) {
+            loginBtn.textContent = '로그아웃';
+            loginBtn.classList.remove('hidden');
+          }
+
+          attachFirestoreListeners(user.uid);
+        });
+      } catch (err) {
+        console.error('Cloud init error:', err);
+        updateCloudBadge('error', '⚠️ 클라우드 연결 오류', err.message);
+      }
+    }
+
+    function attachFirestoreListeners(userId) {
+      if (!db || !userId) return;
+
+      if (unsubscribeSettings) unsubscribeSettings();
+      if (unsubscribeJournal) unsubscribeJournal();
+
+      const settingsDocRef = getUserSettingsDocRef(userId);
+      unsubscribeSettings = onSnapshot(
+        settingsDocRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const remoteData = docSnap.data();
+            state = { ...DEFAULT_STATE, ...remoteData };
+            syncInputsFromState();
+            recalculateAll();
+            renderJournal();
+          } else {
+            saveSettingsToCloud();
+          }
+        },
+        (error) => {
+          console.error('Settings snapshot error:', error);
+          updateCloudBadge('error', '⚠️ 설정 동기화 오류 (Firestore 규칙 확인)', error.message);
+        }
+      );
+
+      const journalColRef = getUserJournalColRef(userId);
+      unsubscribeJournal = onSnapshot(
+        journalColRef,
+        (snapshot) => {
+          const items = [];
+          snapshot.forEach((docItem) => {
+            items.push({ docId: docItem.id, ...docItem.data() });
+          });
+          items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          journal = items;
+          renderJournal();
+        },
+        (error) => {
+          console.error('Journal snapshot error:', error);
+          updateCloudBadge('error', '⚠️ 장부 동기화 오류', error.message);
+        }
+      );
+    }
+
+    async function saveSettingsToCloud() {
+      if (!db || !currentUser) return;
+      try {
+        const settingsDocRef = getUserSettingsDocRef(currentUser.uid);
+        await setDoc(settingsDocRef, {
+          ...state,
+          updatedAt: Date.now()
+        }, { merge: true });
+        const nowStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        updateCloudBadge('connected', '☁️ 클라우드 실시간 동기화됨', `저장됨 (${nowStr})`);
+      } catch (err) {
+        console.error('Save settings error:', err);
+        updateCloudBadge('error', '⚠️ 설정 저장 실패', err.message);
+      }
+    }
+
+    // Initialization
+    function init() {
+      syncInputsFromState();
+
+      const today = new Date().toISOString().split('T')[0];
+      setVal('t-date', today);
+
+      const inputIds = [
+        'inp-symbol', 'inp-api-key',
+        'inp-shares', 'inp-avg-price', 'inp-curr-price',
+        'inp-core-ratio', 'inp-core-ratio-num', 'inp-tranches', 'inp-sell-step',
+        'inp-rebuy-step', 'inp-extra-cash', 'inp-fx'
+      ];
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', handleInputChange);
+      });
+
+      const symbolEl = document.getElementById('inp-symbol');
+      if (symbolEl) {
+        symbolEl.addEventListener('change', () => fetchRealtimeQuote(true));
+      }
+
+      const tradeForm = document.getElementById('trade-form');
+      if (tradeForm) {
+        tradeForm.addEventListener('submit', handleAddTrade);
+      }
+
+      recalculateAll();
+      renderJournal();
+
+      initCloudSync();
+      fetchRealtimeQuote(false);
+    }
+
+    function toggleApiKeyVisibility() {
+      const inp = document.getElementById('inp-api-key');
+      if (inp) {
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    function updateApiBadge(status, text) {
+      const dot = document.getElementById('api-status-dot');
+      setText('api-status-text', text);
+      if (!dot) return;
+
+      if (status === 'loading') {
+        dot.className = 'h-2 w-2 rounded-full bg-blue-400 animate-ping';
+      } else if (status === 'ok') {
+        dot.className = 'h-2 w-2 rounded-full bg-emerald-400';
+      } else {
+        dot.className = 'h-2 w-2 rounded-full bg-rose-400';
+      }
+    }
+
+    async function fetchRealtimeQuote(showNotification = false) {
+      const symbolEl = document.getElementById('inp-symbol');
+      const apiKeyEl = document.getElementById('inp-api-key');
+      const symbol = (symbolEl ? symbolEl.value : state.symbol || 'SOXL').trim().toUpperCase();
+      const apiKey = (apiKeyEl ? apiKeyEl.value : state.apiKey || '').trim();
+      const refreshIcon = document.getElementById('refresh-icon');
+
+      if (!apiKey) {
+        updateApiBadge('error', 'API Key 미입력 (수동 모드)');
+        if (showNotification) showToast('Finnhub API Key를 입력하거나 현재가를 수동으로 입력하세요.', '⚠️');
+        return;
+      }
+
+      updateApiBadge('loading', `${symbol} 시세 조회 중...`);
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+      try {
+        const url = `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${encodeURIComponent(apiKey)}`;
+        const response = await fetch(url);
+
+        if (response.status === 429) {
+          throw new Error('API 호출 한도 초과 (429)');
+        }
+        if (!response.ok) {
+          throw new Error(`HTTP 오류 (${response.status})`);
+        }
+
+        const data = await response.json();
+        if (!data || typeof data.c !== 'number' || data.c <= 0) {
+          throw new Error('유효하지 않은 종목 또는 시세 데이터 없음');
+        }
+
+        state.symbol = symbol;
+        state.apiKey = apiKey;
+        state.currPrice = Number(data.c.toFixed(4));
+        setVal('inp-curr-price', state.currPrice);
+
+        setText('quote-c', fmtUSD(data.c));
+
+        const dp = typeof data.dp === 'number' ? data.dp : 0;
+        const dpEl = document.getElementById('quote-dp');
+        if (dpEl) {
+          dpEl.textContent = `${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%`;
+          dpEl.className = `ml-1.5 px-1.5 py-0.5 rounded font-semibold ${dp >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`;
+        }
+
+        setText('quote-h', typeof data.h === 'number' && data.h > 0 ? fmtUSD(data.h) : '-');
+        setText('quote-l', typeof data.l === 'number' && data.l > 0 ? fmtUSD(data.l) : '-');
+
+        const nowTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setText('quote-updated-at', `기준: ${nowTime}`);
+
+        updateApiBadge('ok', `${symbol} 실시간 연동됨`);
+        handleInputChange();
+
+        if (showNotification) {
+          showToast(`${symbol} 실시간 현재가 ${fmtUSD(data.c)} (${dp >= 0 ? '+' : ''}${dp.toFixed(2)}%) 반영 완료`, '📡');
+        }
+      } catch (err) {
+        console.error('Finnhub API fetch failed:', err);
+        updateApiBadge('error', 'API 오류 (수동 입력 전환)');
+        if (showNotification) {
+          showToast(`시세 조회 실패: ${err.message}. 현재가를 수동으로 입력해주세요.`, '⚠️');
+        }
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+      }
+    }
+
+    function handleInputChange(e) {
+      const symbolEl = document.getElementById('inp-symbol');
+      const apiKeyEl = document.getElementById('inp-api-key');
+      const sharesEl = document.getElementById('inp-shares');
+      const avgPriceEl = document.getElementById('inp-avg-price');
+      const currPriceEl = document.getElementById('inp-curr-price');
+      const coreSliderEl = document.getElementById('inp-core-ratio');
+      const coreNumEl = document.getElementById('inp-core-ratio-num');
+      const tranchesEl = document.getElementById('inp-tranches');
+      const sellStepEl = document.getElementById('inp-sell-step');
+      const rebuyStepEl = document.getElementById('inp-rebuy-step');
+      const extraCashEl = document.getElementById('inp-extra-cash');
+      const fxEl = document.getElementById('inp-fx');
+
+      state.symbol = (symbolEl ? symbolEl.value : 'SOXL').trim().toUpperCase();
+      state.apiKey = (apiKeyEl ? apiKeyEl.value : '').trim();
+      state.shares = Math.max(1, parseInt(sharesEl ? sharesEl.value : 1369, 10) || 0);
+      state.avgPrice = Math.max(0.0001, parseFloat(avgPriceEl ? avgPriceEl.value : 139.0912) || 0);
+      state.currPrice = Math.max(0.01, parseFloat(currPriceEl ? currPriceEl.value : 25.00) || 0);
+
+      if (e && e.target && e.target.id === 'inp-core-ratio-num') {
+        const val = Math.min(95, Math.max(50, parseInt(e.target.value, 10) || 80));
+        state.coreRatio = val;
+        setVal('inp-core-ratio', val);
+      } else {
+        const rawVal = coreSliderEl ? coreSliderEl.value : 80;
+        const val = Math.min(95, Math.max(50, parseInt(rawVal, 10) || 80));
+        state.coreRatio = val;
+        if (coreNumEl) coreNumEl.value = val;
+      }
+
+      state.tranches = Math.min(10, Math.max(2, parseInt(tranchesEl ? tranchesEl.value : 4, 10) || 4));
+      state.sellStep = Math.max(0.1, parseFloat(sellStepEl ? sellStepEl.value : 5.0) || 0.1);
+      state.rebuyStep = Math.max(0.1, parseFloat(rebuyStepEl ? rebuyStepEl.value : 6.0) || 0.1);
+      state.extraCash = Math.max(0, parseFloat(extraCashEl ? extraCashEl.value : 0) || 0);
+      state.fxRate = Math.max(1, parseFloat(fxEl ? fxEl.value : 1400) || 1400);
+
+      if (settingsSaveTimer) clearTimeout(settingsSaveTimer);
+      settingsSaveTimer = setTimeout(() => {
+        saveSettingsToCloud();
+      }, 600);
+
+      recalculateAll();
+      renderJournal();
+    }
+
+    function applyPresetStrategy(sellPct, rebuyPct) {
+      setVal('inp-sell-step', sellPct);
+      setVal('inp-rebuy-step', rebuyPct);
+      handleInputChange();
+      showToast(`전략 프리셋 적용: 반등 +${sellPct}% 매도 / 하락 -${rebuyPct}% 재매수`, '⚡');
+    }
+
+    function resetDefaultSettings() {
+      state = { ...DEFAULT_STATE };
+      syncInputsFromState();
+      handleInputChange();
+      fetchRealtimeQuote(true);
+    }
+
+    // Core calculation and rendering functions
+    function recalculateAll() {
+      const totalShares = state.shares;
+      const coreShares = Math.round(totalShares * (state.coreRatio / 100));
+      const reloadShares = Math.max(0, totalShares - coreShares);
+
+      const totalPrincipal = totalShares * state.avgPrice;
+      const currentEval = totalShares * state.currPrice;
+      const unrealizedPnL = currentEval - totalPrincipal;
+      const unrealizedPct = totalPrincipal > 0 ? (unrealizedPnL / totalPrincipal) * 100 : 0;
+
+      // Update Summary Cards
+      setText('stat-core-shares', `${fmtNum(coreShares)}주`);
+      setText('stat-core-pct', `비중 ${state.coreRatio}%`);
+      setText('stat-reload-shares', `${fmtNum(reloadShares)}주`);
+      setText('stat-reload-pct', `비중 ${100 - state.coreRatio}%`);
+      setText('stat-total-principal', fmtUSD(totalPrincipal));
+      setText('stat-total-principal-krw', fmtKRW(totalPrincipal, state.fxRate));
+      setText('stat-current-eval', fmtUSD(currentEval));
+
+      const pnlEl = document.getElementById('stat-unrealized-pnl');
+      if (pnlEl) {
+        pnlEl.textContent = `${fmtUSD(unrealizedPnL)} (${unrealizedPct >= 0 ? '+' : ''}${unrealizedPct.toFixed(2)}%)`;
+        pnlEl.className = `text-xs font-semibold mt-1 ${unrealizedPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+      }
+
+      // Build Tranche Simulation Plan
+      const tranches = state.tranches;
+      const baseSellShares = tranches > 0 ? Math.floor(reloadShares / tranches) : 0;
+      const remainderShares = tranches > 0 ? reloadShares % tranches : 0;
+      const extraCashPerTranche = tranches > 0 ? state.extraCash / tranches : 0;
+
+      currentPlanRows = [];
+      let totalExpectedCash = 0;
+      let totalExpectedTaxLoss = 0;
+      let totalNetGainShares = 0;
+
+      for (let i = 1; i <= tranches; i++) {
+        const sellShares = baseSellShares + (i <= remainderShares ? 1 : 0);
+        const reboundPct = state.sellStep * i;
+        const targetSellPrice = state.currPrice * (1 + reboundPct / 100);
+        const sellProceeds = sellShares * targetSellPrice;
+
+        const realizedPnL = (targetSellPrice - state.avgPrice) * sellShares;
+
+        const targetRebuyPrice = targetSellPrice * (1 - state.rebuyStep / 100);
+        const totalRebuyBudget = sellProceeds + extraCashPerTranche;
+        const rebuyShares = targetRebuyPrice > 0 ? Math.floor(totalRebuyBudget / targetRebuyPrice) : 0;
+        const netGainShares = rebuyShares - sellShares;
+
+        totalExpectedCash += sellProceeds;
+        totalExpectedTaxLoss += realizedPnL;
+        totalNetGainShares += netGainShares;
+
+        currentPlanRows.push({
+          tranche: i,
+          reboundPct,
+          targetSellPrice,
+          sellShares,
+          sellProceeds,
+          realizedPnL,
+          targetRebuyPrice,
+          extraCashPerTranche,
+          rebuyShares,
+          netGainShares
+        });
+      }
+
+      // Render Simulation Table
+      const planTbody = document.getElementById('plan-tbody');
+      if (planTbody) {
+        planTbody.innerHTML = currentPlanRows.map(row => {
+          const pnlColor = row.realizedPnL < 0 ? 'text-purple-300' : 'text-emerald-400';
+          const gainColor = row.netGainShares > 0 ? 'text-emerald-400' : 'text-slate-400';
+          return `
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="py-3 px-4 font-bold text-blue-400">${row.tranche}차</td>
+              <td class="py-3 px-4 text-right font-semibold text-amber-300">
+                ${fmtUSD(row.targetSellPrice)}
+                <span class="block text-[11px] text-slate-400 font-normal">+${row.reboundPct.toFixed(1)}%</span>
+              </td>
+              <td class="py-3 px-4 text-right text-slate-200 font-medium">${fmtNum(row.sellShares)}주</td>
+              <td class="py-3 px-4 text-right text-slate-200">${fmtUSD(row.sellProceeds)}</td>
+              <td class="py-3 px-4 text-right font-semibold ${pnlColor}">
+                ${fmtUSD(row.realizedPnL)}
+                <span class="block text-[11px] text-slate-500 font-normal">${fmtKRW(row.realizedPnL, state.fxRate)}</span>
+              </td>
+              <td class="py-3 px-4 text-right font-semibold text-emerald-300">
+                ${fmtUSD(row.targetRebuyPrice)}
+                <span class="block text-[11px] text-slate-400 font-normal">-${state.rebuyStep.toFixed(1)}%</span>
+              </td>
+              <td class="py-3 px-4 text-right text-slate-200">
+                ${fmtNum(row.rebuyShares)}주
+                ${row.extraCashPerTranche > 0 ? `<span class="block text-[10px] text-blue-400">+${fmtUSD(row.extraCashPerTranche)} 투입</span>` : ''}
+              </td>
+              <td class="py-3 px-4 text-right font-bold ${gainColor}">
+                ${row.netGainShares >= 0 ? '+' : ''}${fmtNum(row.netGainShares)}주
+              </td>
+              <td class="py-3 px-4 text-center">
+                <div class="inline-flex items-center gap-1">
+                  <button type="button" onclick="quickLogTranche(${row.tranche}, 'SELL')" class="px-2 py-1 rounded bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 text-[11px] font-semibold transition">매도기록</button>
+                  <button type="button" onclick="quickLogTranche(${row.tranche}, 'BUY')" class="px-2 py-1 rounded bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-semibold transition">매수기록</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Update Plan Footer Summary
+      const projectedTotalShares = totalShares + totalNetGainShares;
+      const effectiveAvgPrice = projectedTotalShares > 0
+        ? (totalPrincipal + state.extraCash + totalExpectedTaxLoss) / projectedTotalShares
+        : state.avgPrice;
+
+      setText('plan-total-cash', fmtUSD(totalExpectedCash));
+      setText('plan-total-tax-loss', `${fmtUSD(totalExpectedTaxLoss)} (${fmtKRW(totalExpectedTaxLoss, state.fxRate)})`);
+      setText('plan-net-gain-shares', `${totalNetGainShares >= 0 ? '+' : ''}${fmtNum(totalNetGainShares)}주 → 총 ${fmtNum(projectedTotalShares)}주`);
+      setText('plan-effective-avg', `${fmtUSD(Math.max(0, effectiveAvgPrice))} (기존 ${fmtUSD(state.avgPrice)})`);
+    }
+
+    // Trade Journal Functions
+    async function quickLogTranche(trancheIdx, type) {
+      const row = currentPlanRows.find(r => r.tranche === trancheIdx);
+      if (!row) return;
+
+      const today = new Date().toISOString().split('T')[0];
+      const price = type === 'SELL' ? Number(row.targetSellPrice.toFixed(2)) : Number(row.targetRebuyPrice.toFixed(2));
+      const shares = type === 'SELL' ? row.sellShares : row.rebuyShares;
+      const memo = `${state.symbol} ${trancheIdx}차 회전 ${type === 'SELL' ? '반등 분할매도' : '하락 수량증폭 재매수'}`;
+
+      if (shares <= 0) {
+        showToast('체결 수량이 0주이므로 기록할 수 없습니다.', '⚠️');
+        return;
+      }
+
+      await addTradeEntry({
+        createdAt: Date.now(),
+        date: today,
+        symbol: state.symbol,
+        type,
+        price,
+        shares,
+        memo
+      });
+
+      showToast(`${trancheIdx}차 ${type === 'SELL' ? '매도' : '재매수'} 내역(${fmtNum(shares)}주 @ ${fmtUSD(price)})이 기록되었습니다.`, '☁️');
+    }
+
+    async function handleAddTrade(e) {
+      e.preventDefault();
+      const date = document.getElementById('t-date').value;
+      const type = document.getElementById('t-type').value;
+      const price = parseFloat(document.getElementById('t-price').value);
+      const shares = parseInt(document.getElementById('t-shares').value, 10);
+      const memo = document.getElementById('t-memo').value.trim();
+
+      if (!date || isNaN(price) || price <= 0 || isNaN(shares) || shares <= 0) {
+        showToast('체결 단가와 수량을 정확히 입력해주세요.', '⚠️');
+        return;
+      }
+
+      await addTradeEntry({
+        createdAt: Date.now(),
+        date,
+        symbol: state.symbol,
+        type,
+        price,
+        shares,
+        memo: memo || `${state.symbol} 수동 입력`
+      });
+
+      setVal('t-price', '');
+      setVal('t-shares', '');
+      setVal('t-memo', '');
+      showToast('매매 체결 내역이 추가되었습니다.', '✅');
+    }
+
+    async function addTradeEntry(entry) {
+      if (!db || !currentUser) {
+        journal.unshift({ docId: String(Date.now()), ...entry });
+        renderJournal();
+        return;
+      }
+      try {
+        const journalColRef = getUserJournalColRef(currentUser.uid);
+        await addDoc(journalColRef, entry);
+      } catch (err) {
+        console.error('Add trade entry error:', err);
+        showToast(`저장 실패: ${err.message}`, '⚠️');
+      }
+    }
+
+    async function deleteTradeEntry(docId) {
+      if (!db || !currentUser) {
+        journal = journal.filter(item => item.docId !== docId);
+        renderJournal();
+        showToast('선택한 기록이 삭제되었습니다.', '🗑️');
+        return;
+      }
+      try {
+        const itemDocRef = getUserJournalDocRef(currentUser.uid, docId);
+        await deleteDoc(itemDocRef);
+        showToast('클라우드에서 기록이 삭제되었습니다.', '🗑️');
+      } catch (err) {
+        console.error('Delete trade entry error:', err);
+        showToast(`삭제 실패: ${err.message}`, '⚠️');
+      }
+    }
+
+    async function clearJournal() {
+      if (journal.length === 0) return;
+      if (!db || !currentUser) {
+        journal = [];
+        renderJournal();
+        showToast('매매 장부가 초기화되었습니다.', '🧹');
+        return;
+      }
+      try {
+        const journalColRef = getUserJournalColRef(currentUser.uid);
+        const snap = await getDocs(journalColRef);
+        const deletePromises = [];
+        snap.forEach((docSnap) => {
+          deletePromises.push(deleteDoc(getUserJournalDocRef(currentUser.uid, docSnap.id)));
+        });
+        await Promise.all(deletePromises);
+        showToast('클라우드 매매 장부가 모두 초기화되었습니다.', '🧹');
+      } catch (err) {
+        console.error('Clear journal error:', err);
+        showToast(`초기화 실패: ${err.message}`, '⚠️');
+      }
+    }
+
+    function renderJournal() {
+      const tbody = document.getElementById('journal-tbody');
+      const emptyEl = document.getElementById('journal-empty');
+      const statsEl = document.getElementById('journal-summary-stats');
+      if (!tbody) return;
+
+      if (journal.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        if (statsEl) statsEl.textContent = '기록 0건';
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add('hidden');
+
+      let totalSoldShares = 0;
+      let totalReboughtShares = 0;
+      let totalRealizedPnL = 0;
+
+      tbody.innerHTML = journal.map(item => {
+        const amount = item.price * item.shares;
+        let pnlHtml = '<span class="text-slate-500">-</span>';
+
+        if (item.type === 'SELL') {
+          totalSoldShares += item.shares;
+          const realizedPnL = (item.price - state.avgPrice) * item.shares;
+          totalRealizedPnL += realizedPnL;
+          const pnlColor = realizedPnL < 0 ? 'text-purple-300' : 'text-emerald-400';
+          pnlHtml = `<span class="font-semibold ${pnlColor}">${fmtUSD(realizedPnL)}</span>`;
+        } else {
+          totalReboughtShares += item.shares;
+        }
+
+        const badge = item.type === 'SELL'
+          ? '<span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 font-semibold text-[11px]">분할 매도</span>'
+          : '<span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-semibold text-[11px]">수량 재매수</span>';
+
+        const safeDocId = String(item.docId || '').replace(/'/g, "\\'");
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 text-slate-300">${item.date}</td>
+            <td class="py-3 px-4">${badge}</td>
+            <td class="py-3 px-4 text-right font-medium text-slate-200">${fmtUSD(item.price)}</td>
+            <td class="py-3 px-4 text-right text-slate-200">${fmtNum(item.shares)}주</td>
+            <td class="py-3 px-4 text-right text-slate-300">${fmtUSD(amount)}</td>
+            <td class="py-3 px-4 text-right">${pnlHtml}</td>
+            <td class="py-3 px-4 text-slate-400 text-xs">${item.memo || '-'}</td>
+            <td class="py-3 px-4 text-center">
+              <button type="button" onclick="deleteTradeEntry('${safeDocId}')" class="text-slate-500 hover:text-rose-400 transition text-xs px-2 py-1">삭제</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      const netAccumulatedShares = totalReboughtShares - totalSoldShares;
+      if (statsEl) {
+        statsEl.innerHTML = `
+          누적 매도 <strong class="text-amber-300">${fmtNum(totalSoldShares)}주</strong> · 
+          누적 재매수 <strong class="text-emerald-300">${fmtNum(totalReboughtShares)}주</strong> · 
+          실전 순증가 <strong class="text-blue-300">${netAccumulatedShares >= 0 ? '+' : ''}${fmtNum(netAccumulatedShares)}주</strong> · 
+          확정 손익 <strong class="text-purple-300">${fmtUSD(totalRealizedPnL)}</strong>
+        `;
+      }
+    }
+
+    function exportJournalCSV() {
+      if (journal.length === 0) {
+        showToast('내보낼 매매 기록이 없습니다.', '⚠️');
+        return;
+      }
+
+      const headers = ['체결일자', '구분', '종목', '체결단가($)', '수량(주)', '총체결금액($)', '양도세상계손익($)', '메모'];
+      const rows = journal.map(item => {
+        const amount = (item.price * item.shares).toFixed(2);
+        const realizedPnL = item.type === 'SELL' ? ((item.price - state.avgPrice) * item.shares).toFixed(2) : '0.00';
+        const typeLabel = item.type === 'SELL' ? '분할매도' : '수량재매수';
+        const safeMemo = `"${(item.memo || '').replace(/"/g, '""')}"`;
+        return [item.date, typeLabel, item.symbol || state.symbol, item.price, item.shares, amount, realizedPnL, safeMemo].join(',');
+      });
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${state.symbol}_SelfReload_Journal_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast('구글 시트용 CSV 파일이 다운로드되었습니다.', '📥');
+    }
+
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      setText('toast-icon', icon);
+      setText('toast-msg', msg);
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3200);
+    }
+
+    // Expose functions to global window scope
+    window.fetchRealtimeQuote = fetchRealtimeQuote;
+    window.toggleApiKeyVisibility = toggleApiKeyVisibility;
+    window.resetDefaultSettings = resetDefaultSettings;
+    window.applyPresetStrategy = applyPresetStrategy;
+    window.quickLogTranche = quickLogTranche;
+    window.deleteTradeEntry = deleteTradeEntry;
+    window.clearJournal = clearJournal;
+    window.exportJournalCSV = exportJournalCSV;
+    window.openFirebaseModal = openFirebaseModal;
+    window.closeFirebaseModal = closeFirebaseModal;
+    window.saveCustomFirebaseConfig = saveCustomFirebaseConfig;
+    window.clearCustomFirebaseConfig = clearCustomFirebaseConfig;
+    window.handleGoogleAuthClick = handleGoogleAuthClick;
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
