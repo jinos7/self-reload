@@ -429,6 +429,8 @@
     // Default Configuration
     const DEFAULT_FINNHUB_KEY = 'd40b8f9r01qkrgfcbnf0d40b8f9r01qkrgfcbnfg';
     const STORAGE_KEY_FB_CONFIG = 'soxl_custom_firebase_config_v1';
+    // 필요 시 아래 DEFAULT_FIREBASE_CONFIG 객체에 본인의 Firebase 설정값을 직접 적어둘 수 있습니다.
+    const DEFAULT_FIREBASE_CONFIG = null;
     const DEFAULT_STATE = {
       symbol: 'SOXL',
       apiKey: DEFAULT_FINNHUB_KEY,
@@ -521,32 +523,55 @@
     }
 
     function parseFirebaseConfigInput(rawText) {
+      if (!rawText || !rawText.trim()) {
+        throw new Error('Firebase 설정 내용을 입력해주세요.');
+      }
       const cleaned = rawText
         .replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
-        .replace(/const\s+\w+\s*=\s*/, '')
+        .replace(/^\s*(const|let|var)\s+[a-zA-Z0-9_$]+\s*=\s*/i, '')
         .replace(/;\s*$/, '')
         .trim();
+
       const firstBrace = cleaned.indexOf('{');
       const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace === -1 || lastBrace === -1) {
+      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
         throw new Error('올바른 중괄호({ ... }) 형식의 설정 객체가 아닙니다.');
       }
+
       const objStr = cleaned.slice(firstBrace, lastBrace + 1);
-      // Convert JS object literal keys to valid JSON keys safely
-      const jsonStr = objStr
-        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
-        .replace(/,\s*}/g, '}');
-      const parsed = JSON.parse(jsonStr);
-      if (!parsed.apiKey || !parsed.projectId) {
+      let parsed = null;
+
+      try {
+        const evaluator = new Function(`return (${objStr});`);
+        parsed = evaluator();
+      } catch (evalErr) {
+        const jsonStr = objStr
+          .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
+          .replace(/'/g, '"')
+          .replace(/,\s*}/g, '}');
+        parsed = JSON.parse(jsonStr);
+      }
+
+      if (!parsed || typeof parsed !== 'object' || !parsed.apiKey || !parsed.projectId) {
         throw new Error('apiKey와 projectId 항목이 반드시 포함되어야 합니다.');
       }
-      return parsed;
+
+      return {
+        apiKey: String(parsed.apiKey).trim(),
+        authDomain: parsed.authDomain ? String(parsed.authDomain).trim() : `${String(parsed.projectId).trim()}.firebaseapp.com`,
+        projectId: String(parsed.projectId).trim(),
+        storageBucket: parsed.storageBucket ? String(parsed.storageBucket).trim() : `${String(parsed.projectId).trim()}.firebasestorage.app`,
+        messagingSenderId: parsed.messagingSenderId ? String(parsed.messagingSenderId).trim() : '',
+        appId: parsed.appId ? String(parsed.appId).trim() : ''
+      };
     }
 
     function openFirebaseModal() {
       const saved = localStorage.getItem(STORAGE_KEY_FB_CONFIG);
       if (saved) {
         setVal('inp-firebase-config', saved);
+      } else if (DEFAULT_FIREBASE_CONFIG && DEFAULT_FIREBASE_CONFIG.apiKey) {
+        setVal('inp-firebase-config', JSON.stringify(DEFAULT_FIREBASE_CONFIG, null, 2));
       }
       const modal = document.getElementById('firebase-modal');
       if (modal) modal.classList.remove('hidden');
@@ -634,6 +659,9 @@
         const customRaw = localStorage.getItem(STORAGE_KEY_FB_CONFIG);
         if (customRaw) {
           firebaseConfig = JSON.parse(customRaw);
+          isCustomFirebase = true;
+        } else if (DEFAULT_FIREBASE_CONFIG && DEFAULT_FIREBASE_CONFIG.apiKey && DEFAULT_FIREBASE_CONFIG.projectId) {
+          firebaseConfig = DEFAULT_FIREBASE_CONFIG;
           isCustomFirebase = true;
         } else if (typeof __firebase_config !== 'undefined') {
           firebaseConfig = JSON.parse(__firebase_config);
