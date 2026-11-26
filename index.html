@@ -400,13 +400,12 @@
       <div class="space-y-2 text-xs text-slate-300">
         <p>Firebase 콘솔의 <strong>프로젝트 설정 → 내 앱(웹)</strong>에서 발급받은 <code class="text-blue-400">firebaseConfig</code> 객체 또는 JSON 전체를 아래에 붙여넣으세요.</p>
         <textarea id="inp-firebase-config" rows="8" placeholder='const firebaseConfig = {
-  apiKey: "AIzaSyB6v06DeE_0cUNtbGBZjuYkOa3A11ayLic",
+  apiKey: "AIzaSy...",
   authDomain: "self-reload.firebaseapp.com",
   projectId: "self-reload",
   storageBucket: "self-reload.firebasestorage.app",
-  messagingSenderId: "1022441119576",
-  appId: "1:1022441119576:web:224f2c0aa77d59abeecf2d",
-  measurementId: "G-0B2DB1V7VP"
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
 };' class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:outline-none rounded-xl p-3 font-mono text-xs text-slate-200"></textarea>
         <p class="text-[11px] text-slate-400">
           ※ 입력한 설정은 현재 브라우저에 저장되며, 저장 후 <strong>Google 로그인</strong>을 하면 PC와 모바일에서 동일한 매매 장부가 실시간 동기화됩니다.
@@ -430,8 +429,16 @@
     // Default Configuration
     const DEFAULT_FINNHUB_KEY = 'd40b8f9r01qkrgfcbnf0d40b8f9r01qkrgfcbnfg';
     const STORAGE_KEY_FB_CONFIG = 'soxl_custom_firebase_config_v1';
-    // 필요 시 아래 DEFAULT_FIREBASE_CONFIG 객체에 본인의 Firebase 설정값을 직접 적어둘 수 있습니다.
-    const DEFAULT_FIREBASE_CONFIG = null;
+    // 본인 Firebase(self-reload) 프로젝트 기본 설정값
+    const DEFAULT_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyB6v06DeE_0cUNtbGBZjuYkOa3A11ayLic",
+      authDomain: "self-reload.firebaseapp.com",
+      projectId: "self-reload",
+      storageBucket: "self-reload.firebasestorage.app",
+      messagingSenderId: "1022441119576",
+      appId: "1:1022441119576:web:224f2c0aa77d59abeecf2d",
+      measurementId: "G-0B2DB1V7VP"
+    };
     const DEFAULT_STATE = {
       symbol: 'SOXL',
       apiKey: DEFAULT_FINNHUB_KEY,
